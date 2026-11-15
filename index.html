@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>财富规划助手 · 对话式原型</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-mark">富</div>
+      <div class="brand-copy">
+        <div class="brand-title">财富规划助手</div>
+        <div class="brand-sub">兴业智能服务平台 · 对话式原型</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <label class="customer-switch">
+        <span>当前客户</span>
+        <select id="profileSelect" aria-label="切换客户"></select>
+      </label>
+      <button class="btn ghost-light" id="demoBtn" type="button">载入示例方案</button>
+      <button class="btn ghost-light" id="resetBtn" type="button">重新开始</button>
+      <button class="btn ghost-light quiet" id="exitBtn" type="button">退出</button>
+    </div>
+  </div>
+
+  <main class="workspace">
+    <aside class="panel profile-panel">
+      <div class="panel-head">
+        <span class="eyebrow">客户 360 画像</span>
+        <span class="verified">已核实</span>
+      </div>
+      <div id="profileCard"></div>
+      <div class="divider"></div>
+      <div class="section-head">
+        <span class="section-title">规划目标</span>
+        <span class="muted small">可多选</span>
+      </div>
+      <div class="goal-list" id="goalList"></div>
+      <p class="goal-note">投资计划是统一年度账本的基础模块，始终纳入测算。</p>
+      <div class="divider"></div>
+      <div class="section-head">
+        <span class="section-title">问答进度</span>
+        <span class="muted small" id="progressText">0 / 0</span>
+      </div>
+      <div class="progress" aria-hidden="true"><div class="progress-bar" id="progressBar"></div></div>
+      <div class="legend">
+        <span><i class="dot dot-profile"></i>画像带入</span>
+        <span><i class="dot dot-client"></i>客户提供</span>
+        <span><i class="dot dot-default"></i>系统默认</span>
+        <span><i class="dot dot-edited"></i>经理修改</span>
+      </div>
+    </aside>
+
+    <section class="panel chat-panel">
+      <div class="chat-head">
+        <div>
+          <div class="section-title">规划对话</div>
+          <div class="chat-status"><i class="pulse"></i>助手在线 · 对话引导采集 · 确定性程序测算</div>
+        </div>
+        <button class="txt-btn" id="confirmTopBtn" type="button">集中确认</button>
+      </div>
+      <div class="chat-messages" id="chatMessages"></div>
+      <div class="composer">
+        <div class="composer-hint" id="composerHint">请先选择规划目标</div>
+        <div class="composer-row">
+          <input id="chatInput" type="text" autocomplete="off" placeholder="输入回答，或点击上方选项" disabled>
+          <button class="send-btn" id="sendBtn" type="button" disabled>
+            <span>发送</span>
+            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 10l14-6-4.5 6L17 16 3 10z"/></svg>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <aside class="panel insight-panel">
+      <div class="insight-head">
+        <div class="section-title">测算结果</div>
+        <span class="status-chip hidden" id="resultStatus"></span>
+      </div>
+      <div id="insightBody" class="insight-body"></div>
+      <div class="divider"></div>
+      <div class="section-head">
+        <span class="section-title">已采集字段</span>
+        <button class="txt-btn" id="editFieldsBtn" type="button">修改</button>
+      </div>
+      <div class="field-list" id="fieldList"></div>
+    </aside>
+  </main>
+
+  <div class="modal hidden" id="confirmModal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+    <div class="modal-backdrop" data-close></div>
+    <div class="modal-card confirm-card">
+      <div class="modal-head">
+        <div>
+          <div class="eyebrow">集中确认</div>
+          <h2 id="confirmTitle">核对输入与假设</h2>
+          <p>确认页集中展示客户提供值、画像带入值、系统默认值与经理修改值。修改后请重新测算。</p>
+        </div>
+        <button class="icon-btn" type="button" data-close aria-label="关闭">×</button>
+      </div>
+      <div class="modal-body" id="confirmBody"></div>
+      <div class="modal-foot">
+        <div class="confirm-errors" id="confirmErrors"></div>
+        <div class="modal-foot-actions">
+          <button class="btn secondary" type="button" data-close>取消</button>
+          <button class="btn primary" id="confirmCalcBtn" type="button">确认并测算</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal hidden" id="resultsModal" role="dialog" aria-modal="true" aria-labelledby="resultsTitle">
+    <div class="modal-backdrop" data-close></div>
+    <div class="modal-card results-card">
+      <div class="results-head">
+        <div class="results-title-wrap">
+          <div class="eyebrow">测算结果 · <span id="parameterVersion">演示参数</span></div>
+          <h2 id="resultsTitle">财富规划结果</h2>
+          <p id="resultsSub"></p>
+        </div>
+        <div class="results-actions">
+          <button class="btn secondary" id="downloadWordBtn" type="button">下载 Word</button>
+          <button class="btn secondary" id="printBtn" type="button">打印 / PDF</button>
+          <button class="icon-btn" type="button" data-close aria-label="关闭">×</button>
+        </div>
+      </div>
+      <div class="tabs" id="resultTabs" role="tablist">
+        <button type="button" data-tab="summary" class="active" role="tab">摘要</button>
+        <button type="button" data-tab="years" role="tab">逐年现金流</button>
+        <button type="button" data-tab="housing" role="tab">购房</button>
+        <button type="button" data-tab="education" role="tab">教育</button>
+        <button type="button" data-tab="retirement" role="tab">养老</button>
+        <button type="button" data-tab="proposal" role="tab">建议书</button>
+      </div>
+      <div class="results-body" id="resultsBody"></div>
+    </div>
+  </div>
+
+  <div class="toast hidden" id="toast" role="status"></div>
+  <div class="error-banner hidden" id="errorBanner"></div>
+
+  <script src="data.js"></script>
+  <script src="engine.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
